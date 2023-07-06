@@ -56,7 +56,7 @@ $result_matchs = $conn->query($sql_matchs);
 
 <h2>Menu</h2>
     <ul>
-        <li><a href="connexion.php">Se connecter</a></li>
+        <li><a href="login.php">Se connecter</a></li>
         <li><a href="visual_match.php">Visualiser tous les matchs</a></li>
         <li><a href="parier.php">Parier</a></li>
     </ul>

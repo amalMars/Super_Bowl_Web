@@ -27,43 +27,59 @@ $result = $conn->query($sql);
 
     <form method="post" action="enregistrer_mise.php">
         <?php
-         if ($result->num_rows > 0) {
-    
-        while ($row = $result->fetch_assoc()) {
-            $matchId = $row['id_match'];
-            $equipe1_id = $row["equipe1_id"];
-             // Récupérer les noms des équipes
-             $sql_equipe1 = "SELECT nom_equipe FROM equipe WHERE id_equipe = $equipe1_id"; // Remplacez "equipe" par le nom de votre table d'équipes et "id" par le champ correspondant à l'équipe
-             $result_equipe1 = $conn->query($sql_equipe1);
-             $row_equipe1 = $result_equipe1->fetch_assoc();
-             $equipe1_nom = $row_equipe1["nom_equipe"];
+if ($result->num_rows > 0) {
+
  
-             $sql_equipe2 = "SELECT nom_equipe FROM equipe WHERE id_equipe = $equipe2_id"; // Remplacez "equipe" par le nom de votre table d'équipes et "id" par le champ correspondant à l'équipe
-             $result_equipe2 = $conn->query($sql_equipe2);
-             $row_equipe2 = $result_equipe2->fetch_assoc();
-             $equipe2_nom = $row_equipe2["nom_equipe"];
+    while ($row = $result->fetch_assoc()) {
+        $jourMatch = date("Y-m-d", strtotime($row['heur_debut']));
+        $heureDebut = date("H:i", strtotime($row['heur_debut']));
+        $heureFin = date("H:i", strtotime($row['heur_fin']));
+        $statut = $row['statut'];
+        $score = $row['score'];
+        $matchId = $row['id_match'];
+        $equipe1_id = $row["equipe1_id"];
+        $equipe2_id = $row["equipe2_id"];
+        $lienDetails = "details.php?id=$matchId";
+        if ($statut == "a venir" || $statut == "En Cours") {
 
-             
-            $jourMatch = date("Y-m-d", strtotime($row['heur_debut']));
-            $heureDebut = date("H:i", strtotime($row['heur_debut']));
-            $heureFin = date("H:i", strtotime($row['heur_fin']));
-            $statut = $row['statut'];
-            $score = $row['score'];
-            $lienDetails = "details_match.php?id=$matchId";
+        
+        // Récupérer les noms des équipes
+        $sql_equipe1 = "SELECT nom_equipe FROM equipe WHERE id_equipe = $equipe1_id"; // Remplacez "equipe1" par le nom de votre table d'équipes et "id" par le champ correspondant à l'équipe
+        $result_equipe1 = $conn->query($sql_equipe1);
+        $row_equipe1 = $result_equipe1->fetch_assoc();
+        $equipe1_nom = $row_equipe1["nom_equipe"];
 
-            // Déterminer le statut du match
-            $statutMatch = "";
-            if ($statut == "Termine") {
-                $statutMatch = "Terminé";
-            } elseif ($statut == "En Cours") {
-                $statutMatch = "En cours";
-            } else {
-                $statutMatch = "À venir";
-            }
+        $sql_equipe2 = "SELECT nom_equipe FROM equipe WHERE id_equipe = $equipe2_id"; // Remplacez "equipe2" par le nom de votre table d'équipes et "id" par le champ correspondant à l'équipe
+        $result_equipe2 = $conn->query($sql_equipe2);
+        $row_equipe2 = $result_equipe2->fetch_assoc();
+        $equipe2_nom = $row_equipe2["nom_equipe"];
+
+
+     
+
+        // Déterminer le statut du match
+        $statutMatch = "";
+        if ($statut == "Termine") {
+            $statutMatch = "Terminé";
+        } elseif ($statut == "En Cours") {
+            $statutMatch = "En cours";
+        } else {
+            $statutMatch = "À venir";
+        }
+        // Récupérer les noms des équipes
+        $sql_equipe1 = "SELECT nom_equipe FROM equipe WHERE id_equipe = $equipe1_id";
+        $result_equipe1 = $conn->query($sql_equipe1);
+        $row_equipe1 = $result_equipe1->fetch_assoc();
+        $equipe1_nom = $row_equipe1["nom_equipe"];
+
+        $sql_equipe2 = "SELECT nom_equipe FROM equipe WHERE id_equipe = $equipe2_id";
+        $result_equipe2 = $conn->query($sql_equipe2);
+        $row_equipe2 = $result_equipe2->fetch_assoc();
+        $equipe2_nom = $row_equipe2["nom_equipe"];
         ?>
 
         <input type="checkbox" name="matchs[]" value="<?php echo $matchId; ?>">
-        <strong><?php echo $equipe1Nom; ?> vs <?php echo $equipe2Nom; ?></strong>
+        <strong><?php echo $equipe1_nom; ?> vs <?php echo $equipe2_nom; ?></strong>
         <br>
         Jour du match : <?php echo $jourMatch; ?>
         <br>
@@ -82,8 +98,9 @@ $result = $conn->query($sql);
         <br>
 
         <?php
-        }
-        echo "</table>";
+    }
+    echo "</table>";
+}
     } else {
         echo "Aucun match trouvé.";
     }
@@ -96,7 +113,7 @@ $result = $conn->query($sql);
     </form>
 
     <br>
-    <a href="connexion.php">Se connecter</a>
+    <a href="login.php">Se connecter</a>
 
 </body>
 </html>

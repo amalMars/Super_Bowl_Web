@@ -23,10 +23,7 @@ if (isset($_GET['id'])) {
     $sql_match = "SELECT * FROM matchs WHERE id_match = $match_id";
     $result_match = $conn->query($sql_match);
 
-    // Récupérer les compositions des équipes
-    $sql_compositions = "SELECT * FROM composition WHERE match_id = $match_id";
-    $result_compositions = $conn->query($sql_compositions);
-
+   
     // Récupérer les cotes des équipes
     $sql_cotes = "SELECT * FROM cote WHERE match_id = $match_id";
     $result_cotes = $conn->query($sql_cotes);
@@ -45,6 +42,12 @@ if ($result_match->num_rows > 0) {
     $score = $row_match["score"];
     $meteo = $row_match["meteo"];
    }
+
+    // Récupérer les compositions des équipes
+    $sql_compositions = "SELECT * FROM joueur WHERE equipe_id = $equipe1_id ||equipe_id=$equipe2_id";
+    $result_compositions = $conn->query($sql_compositions);
+
+
         // Récupérer les noms des équipes
         $sql_equipe1 = "SELECT nom_equipe FROM equipe WHERE id_equipe = $equipe1_id";
         $result_equipe1 = $conn->query($sql_equipe1);
@@ -68,16 +71,16 @@ if ($result_match->num_rows > 0) {
             echo "<h3>Compositions des équipes</h3>";
             while ($row_composition = $result_compositions->fetch_assoc()) {
                 $equipe_id = $row_composition["equipe_id"];
-                $nombre_joueurs = $row_composition["numero_joueurs"];
+                $nombre_joueurs = $row_composition["numero_joeur"];
 
                 // Récupérer les noms des joueurs de l'équipe
-                $sql_joueurs = "SELECT nom_joueur, prenom_joueur FROM joueur WHERE equipe_id = $equipe_id";
+                $sql_joueurs = "SELECT nom_joeur, prenom_joueur FROM joueur WHERE equipe_id = $equipe_id";
                 $result_joueurs = $conn->query($sql_joueurs);
 
                 echo "<p>$nombre_joueurs joueurs dans l'équipe $equipe_id :</p>";
                 echo "<ul>";
                 while ($row_joueur = $result_joueurs->fetch_assoc()) {
-                    $nom_joueur = $row_joueur["nom_joueur"];
+                    $nom_joueur = $row_joueur["nom_joeur"];
                     $prenom_joueur = $row_joueur["prenom_joueur"];
                     echo "<li>$nom_joueur $prenom_joueur</li>";
                 }
@@ -113,28 +116,14 @@ if ($result_match->num_rows > 0) {
         }
 
 
-        // Afficher le bouton "Miser" ou "Actualiser" en fonction du statut du match et de l'authentification de l'utilisateur
-        if ($statut != "Termine" && $statut != "En Cours") 
+        // Afficher le bouton "Miser"  en fonction du statut du match et de l'authentification de l'utilisateur
+        if ($statut != "A venir" && $statut != "En Cours") 
         {
-                if ($utilisateur_authentifie) {
-                // Vérifier si une mise existe déjà pour ce match pour l'utilisateur courant
-                $utilisateur_id = $_SESSION['id_utilisateur'];
-                $mise_query = "SELECT * FROM mise WHERE utilisateur_id = $utilisateur_id AND match_id = $match_id";
-                $mise_result = $conn->query($mise_query);
-              if (!empty($mise_result->num_rows)) {
-                  // Afficher le bouton "Actualiser"
-                  echo "<button>Actualiser</button>";
-                 } else {
-                    // Afficher le formulaire de mise
-                    echo "<form action='parier.php' method='post'>";
-                    echo "Montant : <input type='text' name='montant'><br>";
-                    echo "Équipe : <input type='text' name='equipe'><br>";
-                    echo "<input type='hidden' name='match_id' value='$match_id'>";
-                    echo "<input type='submit' value='Valider'>";
-                    echo "</form>";
-                        }
-                   }else { echo "Veuillez vous connecter pour pouvoir miser.<br>"; 
-                           echo "<button onclick='seconnecter()'> Se connecter</button>";}
+                //*if ($utilisateur_authentifie) {
+                echo "<button onclick='seMiser()'> Se Miser</button>";
+               
+                  //* }else { echo "Veuillez vous connecter pour pouvoir miser.<br>"; 
+                     //*     echo "<button onclick='seconnecter()'> Se connecter</button>";}
         } else{echo "Match introuvable.";}
 
 $conn->close();
@@ -144,5 +133,9 @@ $conn->close();
 function seconnecter() {
     // Rediriger vers la page login si l'utilisateur n'est pas connecté
     window.location.href = "login.php";
+    
+}
+function seMiser(){
+    window.location.href = "miser.php";
 }
 </script>

@@ -1,95 +1,151 @@
 <?php
-// Connexion à la base de données MySQL
-$servername = "localhost";
-$username = "nom_utilisateur";
-$password = "mot_de_passe";
-$dbname = "nom_base_de_donnees";
+// Connexion à la base de données
+$conn = new mysqli('localhost', 'root', '', 'super_bowl');
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Vérifier la connexion
+// Vérification de la connexion
 if ($conn->connect_error) {
-    die("Échec de la connexion à la base de données : " . $conn->connect_error);
+    die("Erreur de connexion à la base de données : " . $conn->connect_error);
 }
 
-// Récupérer la date actuelle
-$currentDate = date("Y-m-d");
 
-// Requête pour récupérer tous les matchs de la journée
-$sql = "SELECT * FROM matchs WHERE date_debut >= '$currentDate' AND date_fin <= '$currentDate'";
-$result = $conn->query($sql);
+// Vérification de la soumission du formulaire de connexion
+if (isset($_POST['connexion'])) {
+    $email = $_POST['email'];
+    $motdepasse = $_POST['motdepasse'];
+    
+// Initialisation de la session
+session_start();
+
+    // Requête pour récupérer les informations de l'utilisateur en fonction de l'e-mail
+    $sql = "SELECT * FROM utilisateur WHERE email = '$email'";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows == 1) {
+        // L'utilisateur existe, vérification du mot de passe
+        $row = $result->fetch_assoc();
+       //$ if (password_verify($motdepasse, $row['mot_passe'])) {
+            // Mot de passe correct, création de la session utilisateur
+            $_SESSION['utilisateur_id'] = $row['id_utilisateur'];
+            $_SESSION['nom'] = $row['nom'];
+            $_SESSION['prenom'] = $row['prenom'];
+
+            // Redirection vers la page d'accueil
+            header("Location: menu.php?utilisateur_id=" .$row['id_utilisateur']. "");
+            exit();
+       //$ } else {
+            // Mot de passe incorrect
+         //$   $erreurConnexion = "Mot de passe incorrect";
+        //$ }
+    } else {
+        // Utilisateur non trouvé
+        $erreurConnexion = "Utilisateur non trouvé";
+    }
+}else{echo"error";}
+
+
+
+// Vérification de la soumission du formulaire d'inscription
+if (isset($_POST['inscription'])) {
+    $nom = $_POST['nom'];
+    $prenom = $_POST['prenom'];
+    $email = $_POST['email'];
+    $motdepasse = $_POST['motdepasse'];
+
+    // Hachage du mot de passe
+    //$ $motdepasseHash = password_hash($motdepasse, PASSWORD_DEFAULT);
+
+    // Requête d'insertion de l'utilisateur dans la base de données
+    $sql = "INSERT INTO utilisateur (nom, prenom, email, mot_passe) VALUES ('$nom', '$prenom', '$email', '$motdepasse')";
+
+    if ($conn->query($sql) === TRUE) {
+        // Utilisateur inscrit avec succès
+        $inscriptionReussie = true;
+    } else {
+        // Erreur lors de l'inscription
+        $erreurInscription = "Erreur lors de l'inscription : " . $conn->error;
+    }
+}
+
+// Fermeture de la connexion à la base de données
+$conn->close();
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Accueil</title>
+    <title>Authentification et Inscription</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <h1>Accueil</h1>
+    <div class="container">
+        <h2>Connexion</h2>
+        <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+            <input type="email" name="email" placeholder="E-mail" required>
+            <input type="password" name="motdepasse" placeholder="Mot de passe" required>
+            <input type="submit" name="connexion" value="Se connecter">
+        </form>
 
-    <h2>Tous les matchs</h2>
-
-    <form method="post" action="enregistrer_mise.php">
-        <?php
-        while ($row = $result->fetch_assoc()) {
-            $matchId = $row['id_match'];
-            $equipe1Id = $row['equipe1_id'];
-            $equipe2Id = $row['equipe2_id'];
-            $dateDebut = $row['date_debut'];
-            $dateFin = $row['date_fin'];
-            $statut = $row['statut'];
-            $score = $row['score'];
-            $meteo = $row['meteo'];
-
-            // Récupérer les noms des équipes à partir de leur ID
-            $sql_equipe1 = "SELECT nom FROM equipe WHERE id = $equipe1Id";
-            $result_equipe1 = $conn->query($sql_equipe1);
-            $equipe1 = $result_equipe1->fetch_assoc()['nom'];
-
-            $sql_equipe2 = "SELECT nom FROM equipe WHERE id = $equipe2Id";
-            $result_equipe2 = $conn->query($sql_equipe2);
-            $equipe2 = $result_equipe2->fetch_assoc()['nom'];
-        ?>
-
-        <input type="checkbox" name="matchs[]" value="<?php echo $matchId; ?>">
-        <strong><?php echo $equipe1; ?> vs <?php echo $equipe2; ?></strong>
-        <br>
-        Jour du match : <?php echo $dateDebut; ?>
-        <br>
-        Heure du début : <?php echo $dateDebut; ?>
-        <br>
-        Heure de fin : <?php echo $dateFin; ?>
-        <br>
-        Statut : <?php echo $statut; ?>
-        <?php if ($statut == "Termine" || $statut == "En Cours") {
-            echo " - Score : " . $score;
-        }
-        ?>
-        <br>
-        Météo : <?php echo $meteo; ?>
-        <br>
-        <br>
-
-        <?php
-        }
-        ?>
-
-        <input type="submit" name="miser" value="Miser sur la sélection">
-    </form>
-
-    <br>
-    <a href="visualiser_matchs.php">Visualiser tous les matchs</a>
-    <br>
-    <a href="connexion.php">Se connecter</a>
-
+        <h2>Inscription</h2>
+        <?php if (isset($inscriptionReussie)) { ?>
+            <div class="succes">Inscription réussie !</div>
+        <?php } elseif (isset($erreurInscription)) { ?>
+            <div 
+           
+class="erreur"><?php echo $erreurInscription; ?></div>
+        <?php } ?>
+        <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+            <input type="text" name="nom" placeholder="Nom" required>
+            <input type="text" name="prenom" placeholder="Prénom" required>
+            <input type="email" name="email" placeholder="E-mail" required>
+            <input type="password" name="motdepasse" placeholder="Mot de passe" required>
+            <input type="submit" name="inscription" value="S'inscrire">
+        </form>
+    </div>
 </body>
 </html>
 
-<?php
-// Fermer la connexion à la base de données
-$conn->close();
-?>
+<style>
+.container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h2 {  text-align: center;}
+
+input[type="text"],
+h2 {text-align: center;}
 
 
-/////us5
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+input[type="submit"] {
+    width:100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.erreur {
+    color: red;
+}
+
+.succes {
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.erreur {
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+    </style>
