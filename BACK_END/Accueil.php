@@ -59,6 +59,11 @@ $result_matchs = $conn->query($sql_matchs);
         <li><a href="login.php">Se connecter</a></li>
         <li><a href="visual_match.php">Visualiser tous les matchs</a></li>
         <li><a href="parier.php">Parier</a></li>
+        <?php if (isset($_GET['utilisateur_id'])) {
+          $utilisateurId = $_GET['utilisateur_id'];    
+        echo"<li><a href='monEspace.php?utilisateur_id=" .$utilisateurId. "'>Mon Espace</a></li>";}
+        ?>
+       
     </ul>
 </body>
 </html>
