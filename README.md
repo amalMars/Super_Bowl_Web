@@ -6,7 +6,7 @@
 
                                                1_2 Page d'Accueil (Avec Evenement) :
 
-  ![Accueil](https://github.com/amalMars/Super_Bowl_Web/assets/62800298/4d451424-c6f0-403d-8a49-5db79d31eaf1)
+![Accueil1](https://github.com/amalMars/Super_Bowl_Web/assets/62800298/3aa1dfa9-15d6-410f-b55e-3f9780cbb5c7)
 
                                                1_3 Page d'Accueil (Apres authentification) :
 
